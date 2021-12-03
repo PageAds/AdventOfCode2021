@@ -148,12 +148,12 @@ namespace AdventOfCode2021
                 for (int rowIndex = 0; rowIndex < input.Length; rowIndex++)
                 {
                     var number = input[rowIndex];
-                    var firstBit = int.Parse(number.Substring(columnIndex, 1));
+                    var bit = int.Parse(number.Substring(columnIndex, 1));
 
-                    if (firstBit == 0)
+                    if (bit == 0)
                         zeroCount++;
 
-                    if (firstBit == 1)
+                    if (bit == 1)
                         oneCount++;
                 }
 
