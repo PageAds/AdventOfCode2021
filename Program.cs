@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AdventOfCode2021
 {
@@ -11,6 +12,7 @@ namespace AdventOfCode2021
             Day2Part1();
             Day2Part2();
             Day3Part1();
+            Day3Part2();
         }
 
         private static void Day1Part1()
@@ -139,8 +141,8 @@ namespace AdventOfCode2021
             var zeroCount = 0;
             var oneCount = 0;
 
-            string gammaRate = string.Empty;
-            string epsilonRate = string.Empty;
+            var gammaRate = string.Empty;
+            var epsilonRate = string.Empty;
             var columnLength = input[0].Length;
 
             for (int columnIndex = 0; columnIndex < columnLength; columnIndex++)
@@ -179,6 +181,64 @@ namespace AdventOfCode2021
             Console.WriteLine($"Gamma Rate: {gammaRateDecimal}");
             Console.WriteLine($"Epsilon Rate: {epsilonRateDecimal}");
             Console.WriteLine($"Power Consumption {gammaRateDecimal * epsilonRateDecimal}");
+        }
+
+        private static void Day3Part2()
+        {
+            var input = System.IO.File.ReadAllLines("day3Input.txt");
+
+            var oxygenGeneratorRating = FilterNumbers(input, 0, true);
+            var c02ScrubberRating = FilterNumbers(input, 0, false);
+
+            string FilterNumbers(string[] numbers, int columnIndex, bool findMostCommonValue)
+            {
+                var zeroCount = 0;
+                var oneCount = 0;
+                var bitCriteria = string.Empty;
+                var filteredNumbers = new List<string>();
+
+                for (int rowIndex = 0; rowIndex < numbers.Length; rowIndex++)
+                { 
+                    var number = numbers[rowIndex];
+                    var bit = int.Parse(number.Substring(columnIndex, 1));
+
+                    if (bit == 0)
+                        zeroCount++;
+
+                    if (bit == 1)
+                        oneCount++;
+                }
+                
+                if (zeroCount > oneCount)
+                    bitCriteria = findMostCommonValue ? "0" : "1";
+
+                if (oneCount > zeroCount)
+                    bitCriteria = findMostCommonValue ? "1" : "0";
+   
+                if (oneCount == zeroCount)
+                    bitCriteria = findMostCommonValue ? "1" : "0";
+
+                for (int rowIndex = 0; rowIndex < numbers.Length; rowIndex++)
+                {
+                    var number = numbers[rowIndex];
+                    var bit = number.Substring(columnIndex, 1);
+
+                    if (bit == bitCriteria)
+                        filteredNumbers.Add(number);
+                }
+                
+                if (filteredNumbers.Count == 1)
+                    return filteredNumbers[0];
+
+                return FilterNumbers(filteredNumbers.ToArray(), columnIndex + 1, findMostCommonValue);
+            }
+
+            var oxygenGeneratorRatingDecimal = Convert.ToInt32(oxygenGeneratorRating, 2);
+            var c02ScrubberRatingDecimal = Convert.ToInt32(c02ScrubberRating, 2);
+            
+            Console.WriteLine($"Oxygen Generator Rating: {oxygenGeneratorRatingDecimal}");
+            Console.WriteLine($"C02 Scrubber Rating: {c02ScrubberRatingDecimal}");
+            Console.WriteLine($"Life Support Rating {oxygenGeneratorRatingDecimal * c02ScrubberRatingDecimal}");
         }
     }
 }
