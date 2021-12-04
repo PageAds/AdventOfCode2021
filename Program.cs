@@ -13,6 +13,7 @@ namespace AdventOfCode2021
             Day2Part2();
             Day3Part1();
             Day3Part2();
+            Day4Part1();
         }
 
         private static void Day1Part1()
@@ -59,7 +60,7 @@ namespace AdventOfCode2021
                     largerThanPreviousCount++;
             }
 
-             Console.WriteLine($"Larger than previous count: {largerThanPreviousCount}");
+            Console.WriteLine($"Larger than previous count: {largerThanPreviousCount}");
         }
 
         private static void Day2Part1()
@@ -198,7 +199,7 @@ namespace AdventOfCode2021
                 var filteredNumbers = new List<string>();
 
                 for (int rowIndex = 0; rowIndex < numbers.Length; rowIndex++)
-                { 
+                {
                     var number = numbers[rowIndex];
                     var bit = int.Parse(number.Substring(columnIndex, 1));
 
@@ -208,13 +209,13 @@ namespace AdventOfCode2021
                     if (bit == 1)
                         oneCount++;
                 }
-                
+
                 if (zeroCount > oneCount)
                     bitCriteria = findMostCommonValue ? "0" : "1";
 
                 if (oneCount > zeroCount)
                     bitCriteria = findMostCommonValue ? "1" : "0";
-   
+
                 if (oneCount == zeroCount)
                     bitCriteria = findMostCommonValue ? "1" : "0";
 
@@ -226,7 +227,7 @@ namespace AdventOfCode2021
                     if (bit == bitCriteria)
                         filteredNumbers.Add(number);
                 }
-                
+
                 if (filteredNumbers.Count == 1)
                     return filteredNumbers[0];
 
@@ -235,10 +236,120 @@ namespace AdventOfCode2021
 
             var oxygenGeneratorRatingDecimal = Convert.ToInt32(oxygenGeneratorRating, 2);
             var c02ScrubberRatingDecimal = Convert.ToInt32(c02ScrubberRating, 2);
-            
+
             Console.WriteLine($"Oxygen Generator Rating: {oxygenGeneratorRatingDecimal}");
             Console.WriteLine($"C02 Scrubber Rating: {c02ScrubberRatingDecimal}");
             Console.WriteLine($"Life Support Rating {oxygenGeneratorRatingDecimal * c02ScrubberRatingDecimal}");
+        }
+
+        private static void Day4Part1()
+        {
+            var input = System.IO.File.ReadAllLines("day4Input.txt");
+            var bingoNumbers = input[0].Split(',');
+            var boards = new List<Tuple<bool, string>[,]>();
+
+            // Draw boards
+            for (int inputRowIndex = 2; inputRowIndex < input.Length; inputRowIndex += 6)
+            {
+                var board = new Tuple<bool, string>[5,5];
+
+                for (int boardRowIndex = 0; boardRowIndex < 5; boardRowIndex++)
+                {
+                    var columns = input[inputRowIndex + boardRowIndex].Split(' ');
+                    columns = Array.FindAll(columns, c => !string.IsNullOrEmpty(c)); // Remove empty values in array
+
+                    for (int boardColumnIndex = 0; boardColumnIndex < columns.Length; boardColumnIndex++)
+                        board[boardRowIndex, boardColumnIndex] = new Tuple<bool, string>(false, columns[boardColumnIndex]);
+                }
+
+                boards.Add(board);
+            }
+
+            var winningNumber = string.Empty;
+            var winningBoardIndex = default(int);
+
+            // Simulate Bingo
+            for (int i = 0; i < bingoNumbers.Length; i++)
+            {
+                var bingoNumber = bingoNumbers[i];
+
+                for (int boardIndex = 0; boardIndex < boards.Count; boardIndex++)
+                {
+                    var board = boards[boardIndex];
+
+                    for (int boardRowIndex = 0; boardRowIndex < 5; boardRowIndex++)
+                    {
+                        for (int boardColumnIndex = 0; boardColumnIndex < 5; boardColumnIndex++)
+                        {
+                            if (bingoNumber == board[boardRowIndex, boardColumnIndex].Item2)
+                                board[boardRowIndex, boardColumnIndex] = new Tuple<bool, string>(true, board[boardRowIndex, boardColumnIndex].Item2);
+                        }
+                    }
+                }
+
+                // Analyse boards
+                for (int boardIndex = 0; boardIndex < boards.Count; boardIndex++)
+                {
+                    var board = boards[boardIndex];
+                    var rowCounter = 0;
+                    for (int rowIndex = 0; rowIndex < 5; rowIndex++)
+                    {
+                        for (int columnIndex = 0; columnIndex < 5; columnIndex++)
+                        {
+                            if (board[rowIndex, columnIndex].Item1 == true)
+                                rowCounter++;
+
+                            if (rowCounter == 5)
+                            {
+                                Console.WriteLine("Bingo!");
+                                winningNumber = bingoNumber;
+                                winningBoardIndex = boardIndex;
+                                rowCounter = 0;
+                            }
+                        }
+                        rowCounter = 0;
+                    }
+
+                    var columnCounter = 0;
+                    for (int columnIndex = 0; columnIndex < 5; columnIndex++)
+                    {
+                        for (int rowIndex = 0; rowIndex < 5; rowIndex++)
+                        {
+                            if (board[rowIndex, columnIndex].Item1 == true)
+                                columnCounter++;
+
+                            if (columnCounter == 5)
+                            {
+                                Console.WriteLine("Bingo!");
+                                winningNumber = bingoNumber;
+                                winningBoardIndex = boardIndex;
+                                columnCounter = 0;
+                            }
+                        }
+                        columnCounter = 0;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(winningNumber))
+                    continue;
+
+                // Answer question
+                var sumOfUnmarked = 0;
+                var winningBoard = boards[winningBoardIndex];
+                for (int rowIndex = 0; rowIndex < 5; rowIndex++)
+                {
+                    for (int columnIndex = 0; columnIndex < 5; columnIndex++)
+                    {
+                        if (winningBoard[rowIndex, columnIndex].Item1 == false)
+                            sumOfUnmarked += int.Parse(winningBoard[rowIndex, columnIndex].Item2);
+                    }
+                }
+
+                var finalScore = sumOfUnmarked * int.Parse(winningNumber);
+
+                Console.WriteLine($"Final Score: {finalScore}");
+                break;
+            }
         }
     }
 }
